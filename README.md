@@ -1,6 +1,6 @@
 # orchard-models
 
-Model profiles for [Orchard](https://github.com/TheProxyCompany/orchard-py): chat templates and control tokens for LLM inference on Apple Silicon.
+Model profiles for [Orchard](https://github.com/TheProxyCompany): chat templates and control tokens for LLM inference on Apple Silicon.
 
 ## Structure
 
@@ -18,7 +18,7 @@ This repository is included as a submodule in:
 
 ## Adding a new model
 
-1. Create a directory named after the model family (e.g., `qwen2/`)
+1. Create a directory named after the model family (e.g., `mistral/`)
 2. Add `control_tokens.json` with the model's special tokens
 3. Add `chat_template.jinja` with the conversation formatting template
 4. Submit a PR
