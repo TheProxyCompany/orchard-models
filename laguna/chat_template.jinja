@@ -4,16 +4,31 @@
 {#- <system>, <user>, <tool_response>, <arg_key>, <arg_value> are plain BPE text. -#}
 {%- set messages = messages if messages is defined else interactions -%}
 {%- if enable_thinking is not defined -%}
-    {#- generation_config default_chat_template_kwargs ships enable_thinking: true -#}
-    {%- set enable_thinking = reasoning if reasoning is defined else true -%}
+    {%- set enable_thinking = reasoning -%}
 {%- endif -%}
-{%- set add_generation_prompt = add_generation_prompt | default(false) -%}
+{%- macro render_content(content) -%}
+    {%- if content is string -%}
+        {{- content -}}
+    {%- elif content is iterable and content is not mapping -%}
+        {%- for item in content -%}
+            {%- if item.text is defined -%}
+                {{- item.text -}}
+            {%- elif item.type is defined and item.type == "text" -%}
+                {{- item.text | default("") -}}
+            {%- endif -%}
+        {%- endfor -%}
+    {%- elif content is none or content is undefined -%}
+        {{- "" -}}
+    {%- else -%}
+        {{- content -}}
+    {%- endif -%}
+{%- endmacro -%}
 {{- "〈|EOS|〉" -}}
 {#- ───── header (system message) ───── -#}
 {#- A caller-supplied system message with empty content opts out of the default below, producing no <system> block. -#}
 {%- set system_message = "You are a helpful, conversationally-fluent assistant made by Poolside. You are here to be helpful to users through natural language conversations." -%}
 {%- if messages and messages[0].role == "system" -%}
-    {%- set system_message = messages[0].content -%}
+    {%- set system_message = render_content(messages[0].content) -%}
     {%- set messages = messages[1:] -%}
 {%- endif -%}
 {%- set has_sys = system_message and system_message.strip() -%}
@@ -38,7 +53,7 @@
 {#- ───── main loop ───── -#}
 {%- for message in messages -%}
     {%- set role = "assistant" if message.role == "agent" else message.role -%}
-    {%- set content = message.content if message.content is string else "" -%}
+    {%- set content = render_content(message.content) -%}
     {%- if role == "user" -%}
         {{- "<user>" + content + "</user>\n" -}}
     {%- elif role == "assistant" -%}
